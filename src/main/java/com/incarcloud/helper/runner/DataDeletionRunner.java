@@ -1,8 +1,8 @@
 package com.incarcloud.helper.runner;
 
 import com.incarcloud.helper.config.DataDeletionConfig;
+import com.incarcloud.helper.service.BigTableService;
 import lombok.extern.log4j.Log4j2;
-import org.apache.hadoop.hbase.client.Connection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -26,10 +26,10 @@ public class DataDeletionRunner implements CommandLineRunner {
     private DataDeletionConfig dataDeletionConfig;
 
     /**
-     * HBase连接对象
+     * 大数据服务接口
      */
     @Autowired
-    private Connection bigTableConnection;
+    private BigTableService bigTableService;
 
     @Override
     public void run(String... args) throws Exception {
