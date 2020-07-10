@@ -1,0 +1,66 @@
+# Tomcat settings
+server:
+  port: ${TOMCAT_SERVER_PORT:8082}
+
+# Management settings
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+# Logging settings
+## 使用starter log4j2省略log4j2.xml文件
+logging:
+  level:
+    root: WARN
+    org:
+      springframework:
+        security: INFO
+        web: ERROR
+      hibernate: INFO
+    com:
+      incarcloud: ${LOGGING_LEVEL_COM_INCARCLOUD:DEBUG}
+  file:
+    path: ${LOGGING_FILE_PATH:./}
+    name: output.log
+    max-size: ${LOGGING_FILE_MAX_SIZE:200MB}
+
+# Spring settings
+spring:
+  profiles:
+    active: dev
+  application:
+    name: zs-cloudtable-helper
+
+# Incarcloud settings
+incarcloud:
+  # HBase配置
+  hbase:
+    # 表格存储zk信息
+    zookeeper:
+      quorum: ${HBASE_ZOOKEEPER_QUORUM:10.0.11.34,10.0.11.35,10.0.11.39}
+      property:
+        clientPort: ${HBASE_ZOOKEEPER_CLIENT_PORT:2181}
+
+# Helper settings
+helper:
+  # 迁移功能
+  data-migration:
+    # 数据表配置
+    table:
+      from: zs:telemetry_jtt808
+      to: zs:telemetry_jtt808_bak
+    # 迁移vin列表
+    vin-list:
+      - TESTGPS0000000001
+      - TESTGPS0000000002
+  # 删除功能
+  data-deletion:
+    # 数据表列表
+    table: zs:telemetry_jtt808
+    # 删除vin列表
+    vin-list:
+      - TESTGPS0000000003
+      - TESTGPS0000000004
+      - TESTGPS0000000005

@@ -1,0 +1,3 @@
+//include "subproj"
+
+rootProject.name = "hbase-helper"
