@@ -2,6 +2,9 @@ package com.incarcloud.helper.service;
 
 import com.incarcloud.boar.bigtable.IBigTable;
 import com.incarcloud.boar.datapack.DataPackObject;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
@@ -35,38 +38,51 @@ public interface BigTableService {
     String QUALIFIER_HIDDEN = "hidden";
 
     /**
+     * 解析数据与原始报文数据
+     */
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    class DataOrigin {
+        /**
+         * 解析数据
+         */
+        private String dataString;
+
+        /**
+         * 原始报文数据
+         */
+        private String originString;
+    }
+
+    /**
      * 存储解析数据
      *
-     * @param tableName      表名称
-     * @param rowKey         存储rowKey
-     * @param dataPackObject 解析数据
-     * @param originBytes    原始报文数据
+     * @param tableName    表名称
+     * @param rowKey       存储rowKey
+     * @param dataString   解析数据
+     * @param originString 原始报文数据
      * @return
      */
-    boolean saveData(String tableName, String rowKey, DataPackObject dataPackObject, byte[] originBytes);
+    boolean saveRecord(String tableName, String rowKey, String dataString, String originString);
 
     /**
      * 根据row key查询记录
      *
      * @param tableName 表名称
      * @param rowKey    主键
-     * @param clazz     指定DataPack类型
-     * @param <T>       支持泛型
      * @return
      */
-    <T extends DataPackObject> T getData(String tableName, String rowKey, Class<T> clazz);
+    DataOrigin getRecord(String tableName, String rowKey);
 
     /**
-     * 读取最早或最近的一条记录，支持指定按照最早或最新排序
+     * 根据row key删除记录
      *
      * @param tableName 表名称
-     * @param vin       车架号
-     * @param clazz     指定DataPack类型
-     * @param sort      默认按照时间倒序，排序规则：按照时间升序或者倒序
-     * @param <T>       支持泛型
+     * @param rowKey    主键
      * @return
      */
-    <T extends DataPackObject> T getData(String tableName, String vin, Class<T> clazz, IBigTable.Sort sort);
+    boolean deleteRecord(String tableName, String rowKey);
 
     /**
      * 分页查询记录

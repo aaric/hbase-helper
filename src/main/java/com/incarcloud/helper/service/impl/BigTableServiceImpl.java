@@ -5,7 +5,6 @@ import com.incarcloud.boar.datapack.DataPackObject;
 import com.incarcloud.boar.util.DataPackObjectUtil;
 import com.incarcloud.boar.util.RowKeyUtil;
 import com.incarcloud.helper.service.BigTableService;
-import io.netty.buffer.ByteBufUtil;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.hbase.TableName;
@@ -37,13 +36,13 @@ public class BigTableServiceImpl implements BigTableService {
     private Connection bigTableConnection;
 
     @Override
-    public boolean saveData(String tableName, String rowKey, DataPackObject dataPackObject, byte[] originBytes) {
+    public boolean saveRecord(String tableName, String rowKey, String dataString, String originString) {
         // 存储到大数据
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // base-族，data-解析数据，origin-原始报文
             Put put = new Put(rowKey.getBytes());
-            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA), Bytes.toBytes(DataPackObjectUtil.toJson(dataPackObject))); //解析数据
-            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN), Bytes.toBytes(ByteBufUtil.hexDump(originBytes))); //原始报文数据
+            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA), Bytes.toBytes(dataString)); //解析数据
+            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN), Bytes.toBytes(dataString)); //原始报文数据
 
             // 执行put操作
             table.put(put);
@@ -60,7 +59,7 @@ public class BigTableServiceImpl implements BigTableService {
     }
 
     @Override
-    public <T extends DataPackObject> T getData(String tableName, String rowKey, Class<T> clazz) {
+    public DataOrigin getRecord(String tableName, String rowKey) {
         // 根据row key查询记录
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // 读取数据
@@ -72,13 +71,8 @@ public class BigTableServiceImpl implements BigTableService {
 
             // 判断json字符串是否为空白字符
             if (StringUtils.isNotBlank(jsonString)) {
-                // 使用属性名id装载RowKey值
-                T data = DataPackObjectUtil.fromJson(jsonString, clazz);
-                data.setId(Bytes.toString(result.getRow()));
-                data.setVid(originString); //使用未使用vid存储原始报文
-
                 // 返回结果
-                return data;
+                return new DataOrigin(jsonString, originString);
             }
 
         } catch (IOException e) {
@@ -88,13 +82,8 @@ public class BigTableServiceImpl implements BigTableService {
     }
 
     @Override
-    public <T extends DataPackObject> T getData(String tableName, String vin, Class<T> clazz, IBigTable.Sort sort) {
-        // 读取最早或最近的一条记录
-        List<T> list = queryData(tableName, vin, clazz, sort, null, null, 1, null);
-        if (null != list && 0 < list.size()) {
-            return list.get(0);
-        }
-        return null;
+    public boolean deleteRecord(String tableName, String rowKey) {
+        return false;
     }
 
     @Override
