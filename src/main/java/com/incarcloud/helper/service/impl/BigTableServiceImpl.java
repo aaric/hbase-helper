@@ -7,6 +7,7 @@ import com.incarcloud.boar.util.RowKeyUtil;
 import com.incarcloud.helper.service.BigTableService;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.*;
@@ -68,6 +69,10 @@ public class BigTableServiceImpl implements BigTableService {
             // 获得json字符串
             String jsonString = Bytes.toString(result.getValue(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA)));
             String originString = Bytes.toString(result.getValue(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN)));
+
+            Cell cell = result.getColumnLatestCell(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA));
+            System.err.println(Bytes.toString(cell.getValueArray()));
+            System.err.println(cell.getTimestamp());
 
             // 判断json字符串是否为空白字符
             if (StringUtils.isNotBlank(jsonString)) {
