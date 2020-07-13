@@ -50,9 +50,19 @@ public interface BigTableService {
         private String dataString;
 
         /**
+         * 解析数据时间戳
+         */
+        private long dataTs;
+
+        /**
          * 原始报文数据
          */
         private String originString;
+
+        /**
+         * 原始报文数据时间戳
+         */
+        private long originTs;
     }
 
     /**

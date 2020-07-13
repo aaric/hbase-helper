@@ -67,18 +67,20 @@ public class BigTableServiceImpl implements BigTableService {
             // 读取数据
             Result result = table.get(new Get(Bytes.toBytes(rowKey)));
 
-            // 获得json字符串
-            String jsonString = Bytes.toString(result.getValue(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA)));
-            String originString = Bytes.toString(result.getValue(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN)));
+            // 解析数据
+            Cell dataCell = result.getColumnLatestCell(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA));
+            String dataString = Bytes.toString(CellUtil.cloneValue(dataCell));
+            long dataTs = dataCell.getTimestamp(); //入库时间
 
-            Cell cell = result.getColumnLatestCell(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA));
-            System.err.println(Bytes.toString(CellUtil.cloneValue(cell)));
-            System.err.println(cell.getTimestamp());
+            // 原始报文数据
+            Cell originCell = result.getColumnLatestCell(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN));
+            String originString = Bytes.toString(CellUtil.cloneValue(originCell));
+            long originTs = originCell.getTimestamp(); //入库时间
 
             // 判断json字符串是否为空白字符
-            if (StringUtils.isNotBlank(jsonString)) {
+            if (StringUtils.isNotBlank(dataString)) {
                 // 返回结果
-                return new DataOrigin(jsonString, originString);
+                return new DataOrigin(dataString, dataTs, originString, originTs);
             }
 
         } catch (IOException e) {
@@ -89,6 +91,18 @@ public class BigTableServiceImpl implements BigTableService {
 
     @Override
     public boolean deleteRecord(String tableName, String rowKey) {
+        // 根据row key删除记录
+        try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
+            // 删除数据
+            Delete delete = new Delete(Bytes.toBytes(rowKey));
+            table.delete(delete);
+
+            // 返回成功
+            return true;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return false;
     }
 

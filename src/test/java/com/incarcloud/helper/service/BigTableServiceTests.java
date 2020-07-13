@@ -1,6 +1,7 @@
 package com.incarcloud.helper.service;
 
 import lombok.extern.log4j.Log4j2;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,13 @@ public class BigTableServiceTests {
     public void testGetRecord() {
         BigTableService.DataOrigin dataOrigin = bigTableService.getRecord("zs:telemetry_jtt808",
                 "0187000TESTGPS0000000002JTT808POSITION#20200710103958####0001");
-        log.debug("--> {}", dataOrigin);
+        log.debug("dataOrigin --> {}", dataOrigin);
+        Assertions.assertNotNull(dataOrigin);
+    }
+
+    @Test
+    public void testDeleteRecord() {
+        Assertions.assertTrue(bigTableService.deleteRecord("zs:telemetry_ic",
+                "e498000TESTBOX0000000001CHECK##########20200713153656####0001"));
     }
 }
