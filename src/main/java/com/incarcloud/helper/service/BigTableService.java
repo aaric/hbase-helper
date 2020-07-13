@@ -58,13 +58,12 @@ public interface BigTableService {
     /**
      * 存储解析数据
      *
-     * @param tableName    表名称
-     * @param rowKey       存储rowKey
-     * @param dataString   解析数据
-     * @param originString 原始报文数据
+     * @param tableName  表名称
+     * @param rowKey     存储rowKey
+     * @param dataOrigin 解析数据与原始报文数据
      * @return
      */
-    boolean saveRecord(String tableName, String rowKey, String dataString, String originString);
+    boolean saveRecord(String tableName, String rowKey, DataOrigin dataOrigin);
 
     /**
      * 根据row key查询记录

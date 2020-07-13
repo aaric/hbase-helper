@@ -36,13 +36,13 @@ public class BigTableServiceImpl implements BigTableService {
     private Connection bigTableConnection;
 
     @Override
-    public boolean saveRecord(String tableName, String rowKey, String dataString, String originString) {
+    public boolean saveRecord(String tableName, String rowKey, DataOrigin dataOrigin) {
         // 存储到大数据
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // base-族，data-解析数据，origin-原始报文
             Put put = new Put(rowKey.getBytes());
-            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA), Bytes.toBytes(dataString)); //解析数据
-            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN), Bytes.toBytes(dataString)); //原始报文数据
+            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA), Bytes.toBytes(dataOrigin.getDataString())); //解析数据
+            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN), Bytes.toBytes(dataOrigin.getOriginString())); //原始报文数据
 
             // 执行put操作
             table.put(put);
