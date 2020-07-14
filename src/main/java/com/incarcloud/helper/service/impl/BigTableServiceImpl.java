@@ -2,7 +2,6 @@ package com.incarcloud.helper.service.impl;
 
 import com.incarcloud.boar.bigtable.IBigTable;
 import com.incarcloud.boar.datapack.DataPackObject;
-import com.incarcloud.boar.util.DataPackObjectUtil;
 import com.incarcloud.boar.util.RowKeyUtil;
 import com.incarcloud.helper.service.BigTableService;
 import lombok.extern.log4j.Log4j2;
@@ -107,7 +106,7 @@ public class BigTableServiceImpl implements BigTableService {
     }
 
     @Override
-    public <T extends DataPackObject> List<T> queryData(String tableName, String vin, Class<T> clazz, IBigTable.Sort sort, Date startTime, Date endTime, Integer pageSize, String startKey) {
+    public <T extends DataPackObject> List<DataOrigin> queryRecord(String tableName, String vin, Class<T> clazz, IBigTable.Sort sort, Date startTime, Date endTime, Integer pageSize, String startKey) {
         // 分页查询记录
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // 构建查询条件
@@ -184,30 +183,34 @@ public class BigTableServiceImpl implements BigTableService {
             scan.setFilter(filterList);
 
             // 遍历查询结果集
-            String jsonString;
-            String originString;
             T data;
-            List<T> dataList = new ArrayList<>();
-            ResultScanner scanner = table.getScanner(scan);
-            for (Result result : scanner) {
-                // 获得json字符串
-                jsonString = Bytes.toString(result.getValue(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA)));
-                originString = Bytes.toString(result.getValue(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN)));
-                if (StringUtils.isNotBlank(jsonString)) {
+            List<DataOrigin> dataList = new ArrayList<>();
+            ResultScanner rs = table.getScanner(scan);
+            Cell dataCell;
+            String dataString;
+            Cell originCell;
+            String originString;
+            for (Result result : rs) {
+                // 解析数据
+                dataCell = result.getColumnLatestCell(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA));
+                dataString = Bytes.toString(CellUtil.cloneValue(dataCell));
+                long dataTs = dataCell.getTimestamp(); //入库时间
+
+                // 原始报文数据
+                originCell = result.getColumnLatestCell(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN));
+                originString = Bytes.toString(CellUtil.cloneValue(originCell));
+                long originTs = originCell.getTimestamp(); //入库时间
+
+                if (StringUtils.isNotBlank(dataString)) {
                     try {
-                        // 转换为json对象
-                        data = DataPackObjectUtil.fromJson(jsonString, clazz);
-                        // 使用属性名id装载RowKey值
-                        data.setId(Bytes.toString(result.getRow()));
-                        // 使用未使用vid存储原始报文
-                        data.setVid(originString);
                         // 添加返回值
-                        dataList.add(data);
+                        dataList.add(new DataOrigin(dataString, dataTs, originString, originTs));
                     } catch (Exception e) {
                         log.error("queryData: json convert object exception", e);
                     }
                 }
             }
+            rs.close();
 
             // 返回数据集
             return dataList;

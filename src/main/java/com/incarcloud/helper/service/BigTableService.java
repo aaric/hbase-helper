@@ -104,8 +104,8 @@ public interface BigTableService {
      * @param endTime   查询结束时间
      * @param pageSize  分页大小
      * @param startKey  指定起始RowKey
-     * @param <T>
+     * @param <T>       支持泛型
      * @return
      */
-    <T extends DataPackObject> List<T> queryData(String tableName, String vin, Class<T> clazz, IBigTable.Sort sort, Date startTime, Date endTime, Integer pageSize, String startKey);
+    <T extends DataPackObject> List<DataOrigin> queryRecord(String tableName, String vin, Class<T> clazz, IBigTable.Sort sort, Date startTime, Date endTime, Integer pageSize, String startKey);
 }
