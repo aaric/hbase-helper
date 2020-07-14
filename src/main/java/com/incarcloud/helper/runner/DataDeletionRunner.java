@@ -53,7 +53,7 @@ public class DataDeletionRunner implements CommandLineRunner {
                 // 记录调试日志
                 log.info("Data deletion vin -> {}", vin);
 
-                // 业务代码
+                // 删除主体业务
                 List<BigTableService.DataOrigin> dataOriginList;
                 while (true) {
                     // 查询数据
