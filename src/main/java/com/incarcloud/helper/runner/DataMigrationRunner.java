@@ -34,7 +34,15 @@ public class DataMigrationRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // 记录日志
-        log.info("Data deletion config, table=(from={}, to={}), vinList={}",
+        log.info("Data migration config, table=(from={}, to={}), vinList={}",
                 dataMigrationConfig.getTable().getFrom(), dataMigrationConfig.getTable().getTo(), dataMigrationConfig.getVinList());
+
+        // **开始作业**
+        log.info("Data migration starting...");
+
+        // **作业内容**
+
+        // **完成作业**
+        log.info("Data migration finished.");
     }
 }

@@ -50,21 +50,30 @@ public interface BigTableService {
         private String dataString;
 
         /**
+         * 解析数据时间戳
+         */
+        private long dataTs;
+
+        /**
          * 原始报文数据
          */
         private String originString;
+
+        /**
+         * 原始报文数据时间戳
+         */
+        private long originTs;
     }
 
     /**
      * 存储解析数据
      *
-     * @param tableName    表名称
-     * @param rowKey       存储rowKey
-     * @param dataString   解析数据
-     * @param originString 原始报文数据
+     * @param tableName  表名称
+     * @param rowKey     存储rowKey
+     * @param dataOrigin 解析数据与原始报文数据
      * @return
      */
-    boolean saveRecord(String tableName, String rowKey, String dataString, String originString);
+    boolean saveRecord(String tableName, String rowKey, DataOrigin dataOrigin);
 
     /**
      * 根据row key查询记录
@@ -95,8 +104,8 @@ public interface BigTableService {
      * @param endTime   查询结束时间
      * @param pageSize  分页大小
      * @param startKey  指定起始RowKey
-     * @param <T>
+     * @param <T>       支持泛型
      * @return
      */
-    <T extends DataPackObject> List<T> queryData(String tableName, String vin, Class<T> clazz, IBigTable.Sort sort, Date startTime, Date endTime, Integer pageSize, String startKey);
+    <T extends DataPackObject> List<DataOrigin> queryRecord(String tableName, String vin, Class<T> clazz, IBigTable.Sort sort, Date startTime, Date endTime, Integer pageSize, String startKey);
 }
