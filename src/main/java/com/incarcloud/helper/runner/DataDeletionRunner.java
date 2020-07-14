@@ -36,5 +36,13 @@ public class DataDeletionRunner implements CommandLineRunner {
         // 记录日志
         log.info("Data deletion config, table={}, vinList={}",
                 dataDeletionConfig.getTable(), dataDeletionConfig.getVinList());
+
+        // **开始作业**
+        log.info("Data deletion starting...");
+
+        // **作业内容**
+
+        // **完成作业**
+        log.info("Data deletion finished.");
     }
 }

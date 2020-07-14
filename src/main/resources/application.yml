@@ -57,7 +57,7 @@ helper:
   # 删除功能
   data-deletion:
     # 数据表列表
-    table: zs:zs:telemetry_ic
+    table: zs:telemetry_ic
     # 删除vin列表
     vin-list:
       - TESTBOX0000000001
