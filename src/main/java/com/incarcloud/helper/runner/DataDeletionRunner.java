@@ -3,6 +3,7 @@ package com.incarcloud.helper.runner;
 import com.incarcloud.helper.config.DataDeletionConfig;
 import com.incarcloud.helper.service.BigTableService;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
@@ -41,6 +42,15 @@ public class DataDeletionRunner implements CommandLineRunner {
         log.info("Data deletion starting...");
 
         // **作业内容**
+        if (StringUtils.isNotBlank(dataDeletionConfig.getTable())
+                && null != dataDeletionConfig.getVinList()
+                && 0 != dataDeletionConfig.getVinList().size()) {
+            // 按照vin集合顺序删除数据
+            dataDeletionConfig.getVinList().forEach(vin -> {
+                // 打印调试日志
+                log.info("Data deletion vin -> {}", vin);
+            });
+        }
 
         // **完成作业**
         log.info("Data deletion finished.");
