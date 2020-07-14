@@ -45,16 +45,15 @@ public class DataDeletionRunner implements CommandLineRunner {
         log.info("Data deletion starting...");
 
         // **作业内容**
-        if (StringUtils.isNotBlank(dataDeletionConfig.getTable())
-                && null != dataDeletionConfig.getVinList()
-                && 0 != dataDeletionConfig.getVinList().size()) {
+        String tableName = dataDeletionConfig.getTable();
+        List<String> vinList = dataDeletionConfig.getVinList();
+        if (StringUtils.isNotBlank(tableName) && null != vinList && 0 != vinList.size()) {
             // 按照vin集合顺序删除数据
-            dataDeletionConfig.getVinList().forEach(vin -> {
+            vinList.forEach(vin -> {
                 // 记录调试日志
                 log.info("Data deletion vin -> {}", vin);
 
                 // 业务代码
-                String tableName = dataDeletionConfig.getTable();
                 List<BigTableService.DataOrigin> dataOriginList;
                 while (true) {
                     // 查询数据
