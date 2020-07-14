@@ -54,13 +54,10 @@ helper:
     # 迁移vin列表
     vin-list:
       - TESTGPS0000000001
-      - TESTGPS0000000002
   # 删除功能
   data-deletion:
     # 数据表列表
-    table: zs:telemetry_jtt808
+    table: zs:zs:telemetry_ic
     # 删除vin列表
     vin-list:
-      - TESTGPS0000000003
-      - TESTGPS0000000004
-      - TESTGPS0000000005
+      - TESTBOX0000000001
