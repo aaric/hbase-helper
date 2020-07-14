@@ -54,7 +54,7 @@ public class BigTableServiceImpl implements BigTableService {
             // 执行put操作
             table.put(put);
 
-            // 打印日志
+            // 记录日志
             log.debug("Save rowKey: {}", dataOrigin.getRowKey());
 
             // 返回结果
@@ -101,6 +101,9 @@ public class BigTableServiceImpl implements BigTableService {
             // 删除数据
             Delete delete = new Delete(Bytes.toBytes(rowKey));
             table.delete(delete);
+
+            // 记录日志
+            log.debug("Delete rowKey: {}", rowKey);
 
             // 返回成功
             return true;
