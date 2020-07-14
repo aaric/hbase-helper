@@ -47,8 +47,7 @@ public class BigTableServiceTests {
     public void testQueryRecord() throws Exception {
         List<BigTableService.DataOrigin> dataOriginList = bigTableService.queryRecord("zs:telemetry_ic",
                 "TESTBOX0000000001", IBigTable.Sort.DESC, 50, null);
-        //dataOriginList.forEach(o -> System.out.println(o));
-        System.err.println(dataOriginList.size());
+        dataOriginList.forEach(o -> System.out.println(o.getRowKey()));
         Assertions.assertNotNull(dataOriginList);
     }
 }

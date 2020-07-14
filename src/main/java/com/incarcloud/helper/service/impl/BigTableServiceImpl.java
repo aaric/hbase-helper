@@ -35,19 +35,27 @@ public class BigTableServiceImpl implements BigTableService {
     private Connection bigTableConnection;
 
     @Override
-    public boolean saveRecord(String tableName, String rowKey, DataOrigin dataOrigin) {
+    public boolean saveRecord(String tableName, DataOrigin dataOrigin) {
         // 存储到大数据
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // base-族，data-解析数据，origin-原始报文
-            Put put = new Put(rowKey.getBytes());
-            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA), Bytes.toBytes(dataOrigin.getDataString())); //解析数据
-            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN), Bytes.toBytes(dataOrigin.getOriginString())); //原始报文数据
+            Put put = new Put(Bytes.toBytes(dataOrigin.getRowKey()));
+            put.addColumn(Bytes.toBytes(FAMILY_BASE),
+                    Bytes.toBytes(QUALIFIER_DATA),
+                    dataOrigin.getDataTs(),
+                    Bytes.toBytes(dataOrigin.getDataString())
+            ); //解析数据
+            put.addColumn(Bytes.toBytes(FAMILY_BASE),
+                    Bytes.toBytes(QUALIFIER_ORIGIN),
+                    dataOrigin.getOriginTs(),
+                    Bytes.toBytes(dataOrigin.getOriginString())
+            ); //原始报文数据
 
             // 执行put操作
             table.put(put);
 
             // 打印日志
-            log.debug("Save rowKey: {}", rowKey);
+            log.debug("Save rowKey: {}", dataOrigin.getRowKey());
 
             // 返回结果
             return true;
@@ -77,7 +85,7 @@ public class BigTableServiceImpl implements BigTableService {
             // 判断json字符串是否为空白字符
             if (StringUtils.isNotBlank(dataString)) {
                 // 返回结果
-                return new DataOrigin(dataString, dataTs, originString, originTs);
+                return new DataOrigin(rowKey, dataString, dataTs, originString, originTs);
             }
 
         } catch (IOException e) {
@@ -161,11 +169,15 @@ public class BigTableServiceImpl implements BigTableService {
             DataOrigin data;
             List<DataOrigin> dataList = new ArrayList<>();
             ResultScanner rs = table.getScanner(scan);
+            String rowKey;
             Cell dataCell;
             String dataString;
             Cell originCell;
             String originString;
             for (Result result : rs) {
+                // row key
+                rowKey = Bytes.toString(result.getRow());
+
                 // 解析数据
                 dataCell = result.getColumnLatestCell(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA));
                 dataString = Bytes.toString(CellUtil.cloneValue(dataCell));
@@ -179,7 +191,7 @@ public class BigTableServiceImpl implements BigTableService {
                 if (StringUtils.isNotBlank(dataString)) {
                     try {
                         // 添加返回值
-                        dataList.add(new DataOrigin(dataString, dataTs, originString, originTs));
+                        dataList.add(new DataOrigin(rowKey, dataString, dataTs, originString, originTs));
                     } catch (Exception e) {
                         log.error("queryData: json convert object exception", e);
                     }

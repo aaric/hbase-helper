@@ -43,6 +43,11 @@ public interface BigTableService {
     @AllArgsConstructor
     class DataOrigin {
         /**
+         * 存储rowKey
+         */
+        private String rowKey;
+
+        /**
          * 解析数据
          */
         private String dataString;
@@ -67,11 +72,10 @@ public interface BigTableService {
      * 存储解析数据
      *
      * @param tableName  表名称
-     * @param rowKey     存储rowKey
      * @param dataOrigin 解析数据与原始报文数据
      * @return
      */
-    boolean saveRecord(String tableName, String rowKey, DataOrigin dataOrigin);
+    boolean saveRecord(String tableName, DataOrigin dataOrigin);
 
     /**
      * 根据row key查询记录
