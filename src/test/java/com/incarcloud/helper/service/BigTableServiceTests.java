@@ -1,7 +1,6 @@
 package com.incarcloud.helper.service;
 
 import com.incarcloud.boar.bigtable.IBigTable;
-import com.incarcloud.boar.datapack.DataPackOverview;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
@@ -11,9 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -49,12 +45,10 @@ public class BigTableServiceTests {
     @Test
     @Disabled
     public void testQueryRecord() throws Exception {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date startTime = dateFormat.parse("2020-07-13 12:00:00");
-        Date endTime = dateFormat.parse("2020-07-14 12:00:00");
         List<BigTableService.DataOrigin> dataOriginList = bigTableService.queryRecord("zs:telemetry_ic",
-                "TESTBOX0000000001", DataPackOverview.class, IBigTable.Sort.DESC, startTime, endTime, 50, null);
-        dataOriginList.forEach(o -> System.out.println(o));
+                "TESTBOX0000000001", IBigTable.Sort.DESC, 50, null);
+        //dataOriginList.forEach(o -> System.out.println(o));
+        System.err.println(dataOriginList.size());
         Assertions.assertNotNull(dataOriginList);
     }
 }

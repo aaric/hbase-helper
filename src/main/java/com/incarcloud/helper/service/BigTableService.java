@@ -1,12 +1,10 @@
 package com.incarcloud.helper.service;
 
 import com.incarcloud.boar.bigtable.IBigTable;
-import com.incarcloud.boar.datapack.DataPackObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -98,14 +96,10 @@ public interface BigTableService {
      *
      * @param tableName 表名称
      * @param vin       车架号
-     * @param clazz     指定DataPack类型
      * @param sort      默认按照时间倒序，排序规则：按照时间升序或者倒序
-     * @param startTime 查询开始时间，如果有startKey，startTime设置无效
-     * @param endTime   查询结束时间
      * @param pageSize  分页大小
      * @param startKey  指定起始RowKey
-     * @param <T>       支持泛型
      * @return
      */
-    <T extends DataPackObject> List<DataOrigin> queryRecord(String tableName, String vin, Class<T> clazz, IBigTable.Sort sort, Date startTime, Date endTime, Integer pageSize, String startKey);
+    List<DataOrigin> queryRecord(String tableName, String vin, IBigTable.Sort sort, Integer pageSize, String startKey);
 }

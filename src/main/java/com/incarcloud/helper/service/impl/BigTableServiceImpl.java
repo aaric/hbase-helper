@@ -1,7 +1,6 @@
 package com.incarcloud.helper.service.impl;
 
 import com.incarcloud.boar.bigtable.IBigTable;
-import com.incarcloud.boar.datapack.DataPackObject;
 import com.incarcloud.boar.util.RowKeyUtil;
 import com.incarcloud.helper.service.BigTableService;
 import lombok.extern.log4j.Log4j2;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -106,7 +104,7 @@ public class BigTableServiceImpl implements BigTableService {
     }
 
     @Override
-    public <T extends DataPackObject> List<DataOrigin> queryRecord(String tableName, String vin, Class<T> clazz, IBigTable.Sort sort, Date startTime, Date endTime, Integer pageSize, String startKey) {
+    public List<DataOrigin> queryRecord(String tableName, String vin, IBigTable.Sort sort, Integer pageSize, String startKey) {
         // 分页查询记录
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // 构建查询条件
@@ -118,48 +116,25 @@ public class BigTableServiceImpl implements BigTableService {
             if (null == sort || IBigTable.Sort.DESC == sort) {
                 // 如果不传startKey，按照时间倒序查询
                 if (StringUtils.isBlank(startKey)) {
-                    // 判断是否设置了查询结束时间
-                    if (null == endTime) {
-                        // 查询范围比较大
-                        startRowKey = RowKeyUtil.makeMaxRowKey(vin, clazz);
-                    } else {
-                        // 查询范围比较小
-                        startRowKey = RowKeyUtil.makeMaxRowKey(vin, clazz, endTime);
-                    }
+                    // 查询范围比较大
+                    startRowKey = RowKeyUtil.makeMaxRowKey(vin);
                 }
 
-                // 判断是否设置了查询开始时间
-                if (null == startTime) {
-                    // 查询范围比较大
-                    stopRowKey = RowKeyUtil.makeMinRowKey(vin, clazz);
-                } else {
-                    // 查询范围比较小
-                    stopRowKey = RowKeyUtil.makeMinRowKey(vin, clazz, startTime);
-                }
+                // 查询范围比较小
+                stopRowKey = RowKeyUtil.makeMinRowKey(vin);
 
                 // 按照时间倒序
                 scan.setReversed(true);
+
             } else {
                 // 如果不传startKey，按照时间升序查询
                 if (StringUtils.isBlank(startKey)) {
-                    // 判断是否设置了查询开始时间
-                    if (null == startTime) {
-                        // 查询范围比较大
-                        startRowKey = RowKeyUtil.makeMinRowKey(vin, clazz);
-                    } else {
-                        // 查询范围比较小
-                        startRowKey = RowKeyUtil.makeMinRowKey(vin, clazz, startTime);
-                    }
+                    // 查询范围比较小
+                    startRowKey = RowKeyUtil.makeMinRowKey(vin);
                 }
 
-                // 判断是否设置了查询结束时间
-                if (null == endTime) {
-                    // 查询范围比较大
-                    stopRowKey = RowKeyUtil.makeMaxRowKey(vin, clazz);
-                } else {
-                    // 查询范围比较小
-                    stopRowKey = RowKeyUtil.makeMaxRowKey(vin, clazz, endTime);
-                }
+                // 查询范围比较小
+                stopRowKey = RowKeyUtil.makeMaxRowKey(vin);
             }
 
             // String转Bytes
@@ -183,7 +158,7 @@ public class BigTableServiceImpl implements BigTableService {
             scan.setFilter(filterList);
 
             // 遍历查询结果集
-            T data;
+            DataOrigin data;
             List<DataOrigin> dataList = new ArrayList<>();
             ResultScanner rs = table.getScanner(scan);
             Cell dataCell;
