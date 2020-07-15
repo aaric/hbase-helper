@@ -55,11 +55,12 @@ public class DataMigrationRunner implements CommandLineRunner {
                 log.info("Data migration vin -> {}", vin);
 
                 // 迁移主体业务
+                String startKey = null;
                 List<BigTableService.DataOrigin> dataOriginList;
                 while (true) {
                     // 查询数据
                     dataOriginList = bigTableService.queryRecord(tableNameFrom,
-                            vin, IBigTable.Sort.DESC, 100, null);
+                            vin, IBigTable.Sort.DESC, 100, startKey);
 
                     // 判断查询记录是否为空
                     if (null == dataOriginList || 0 == dataOriginList.size()) {
@@ -68,6 +69,9 @@ public class DataMigrationRunner implements CommandLineRunner {
                     } else {
                         // 执行迁移操作
                         dataOriginList.forEach(dataOrigin -> bigTableService.saveRecord(tableNameTo, dataOrigin));
+
+                        // 下一页
+                        startKey = dataOriginList.get(dataOriginList.size() - 1).getRowKey();
                     }
                 }
             });
