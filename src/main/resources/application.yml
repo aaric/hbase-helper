@@ -49,15 +49,15 @@ helper:
   data-migration:
     # 数据表配置
     table:
-      from: zs:telemetry_jtt808
-      to: zs:telemetry_jtt808_bak
+      from: zspress:telemetry_ic
+      to: zs:telemetry_ic
     # 迁移vin列表
     vin-list:
-      - TESTGPS0000000001
+      - TESTBOX0000000001
   # 删除功能
   data-deletion:
     # 数据表列表
-    table: zs:telemetry_ic
+    table: zs:telemetry_jtt808
     # 删除vin列表
     vin-list:
-      - TESTBOX0000000001
+      - TESTGPS0000000001

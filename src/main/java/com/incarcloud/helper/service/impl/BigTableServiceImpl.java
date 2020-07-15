@@ -1,7 +1,6 @@
 package com.incarcloud.helper.service.impl;
 
 import com.incarcloud.boar.bigtable.IBigTable;
-import com.incarcloud.boar.datapack.DataPackObject;
 import com.incarcloud.boar.util.RowKeyUtil;
 import com.incarcloud.helper.service.BigTableService;
 import lombok.extern.log4j.Log4j2;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,19 +35,27 @@ public class BigTableServiceImpl implements BigTableService {
     private Connection bigTableConnection;
 
     @Override
-    public boolean saveRecord(String tableName, String rowKey, DataOrigin dataOrigin) {
+    public boolean saveRecord(String tableName, DataOrigin dataOrigin) {
         // 存储到大数据
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // base-族，data-解析数据，origin-原始报文
-            Put put = new Put(rowKey.getBytes());
-            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA), Bytes.toBytes(dataOrigin.getDataString())); //解析数据
-            put.addColumn(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN), Bytes.toBytes(dataOrigin.getOriginString())); //原始报文数据
+            Put put = new Put(Bytes.toBytes(dataOrigin.getRowKey()));
+            put.addColumn(Bytes.toBytes(FAMILY_BASE),
+                    Bytes.toBytes(QUALIFIER_DATA),
+                    dataOrigin.getDataTs(),
+                    Bytes.toBytes(dataOrigin.getDataString())
+            ); //解析数据
+            put.addColumn(Bytes.toBytes(FAMILY_BASE),
+                    Bytes.toBytes(QUALIFIER_ORIGIN),
+                    dataOrigin.getOriginTs(),
+                    Bytes.toBytes(dataOrigin.getOriginString())
+            ); //原始报文数据
 
             // 执行put操作
             table.put(put);
 
-            // 打印日志
-            log.debug("Save rowKey: {}", rowKey);
+            // 记录日志
+            log.debug("Save rowKey: {}", dataOrigin.getRowKey());
 
             // 返回结果
             return true;
@@ -79,7 +85,7 @@ public class BigTableServiceImpl implements BigTableService {
             // 判断json字符串是否为空白字符
             if (StringUtils.isNotBlank(dataString)) {
                 // 返回结果
-                return new DataOrigin(dataString, dataTs, originString, originTs);
+                return new DataOrigin(rowKey, dataString, dataTs, originString, originTs);
             }
 
         } catch (IOException e) {
@@ -96,6 +102,9 @@ public class BigTableServiceImpl implements BigTableService {
             Delete delete = new Delete(Bytes.toBytes(rowKey));
             table.delete(delete);
 
+            // 记录日志
+            log.debug("Delete rowKey: {}", rowKey);
+
             // 返回成功
             return true;
 
@@ -106,7 +115,7 @@ public class BigTableServiceImpl implements BigTableService {
     }
 
     @Override
-    public <T extends DataPackObject> List<DataOrigin> queryRecord(String tableName, String vin, Class<T> clazz, IBigTable.Sort sort, Date startTime, Date endTime, Integer pageSize, String startKey) {
+    public List<DataOrigin> queryRecord(String tableName, String vin, IBigTable.Sort sort, Integer pageSize, String startKey) {
         // 分页查询记录
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // 构建查询条件
@@ -118,48 +127,25 @@ public class BigTableServiceImpl implements BigTableService {
             if (null == sort || IBigTable.Sort.DESC == sort) {
                 // 如果不传startKey，按照时间倒序查询
                 if (StringUtils.isBlank(startKey)) {
-                    // 判断是否设置了查询结束时间
-                    if (null == endTime) {
-                        // 查询范围比较大
-                        startRowKey = RowKeyUtil.makeMaxRowKey(vin, clazz);
-                    } else {
-                        // 查询范围比较小
-                        startRowKey = RowKeyUtil.makeMaxRowKey(vin, clazz, endTime);
-                    }
+                    // 查询范围比较大
+                    startRowKey = RowKeyUtil.makeMaxRowKey(vin);
                 }
 
-                // 判断是否设置了查询开始时间
-                if (null == startTime) {
-                    // 查询范围比较大
-                    stopRowKey = RowKeyUtil.makeMinRowKey(vin, clazz);
-                } else {
-                    // 查询范围比较小
-                    stopRowKey = RowKeyUtil.makeMinRowKey(vin, clazz, startTime);
-                }
+                // 查询范围比较小
+                stopRowKey = RowKeyUtil.makeMinRowKey(vin);
 
                 // 按照时间倒序
                 scan.setReversed(true);
+
             } else {
                 // 如果不传startKey，按照时间升序查询
                 if (StringUtils.isBlank(startKey)) {
-                    // 判断是否设置了查询开始时间
-                    if (null == startTime) {
-                        // 查询范围比较大
-                        startRowKey = RowKeyUtil.makeMinRowKey(vin, clazz);
-                    } else {
-                        // 查询范围比较小
-                        startRowKey = RowKeyUtil.makeMinRowKey(vin, clazz, startTime);
-                    }
+                    // 查询范围比较小
+                    startRowKey = RowKeyUtil.makeMinRowKey(vin);
                 }
 
-                // 判断是否设置了查询结束时间
-                if (null == endTime) {
-                    // 查询范围比较大
-                    stopRowKey = RowKeyUtil.makeMaxRowKey(vin, clazz);
-                } else {
-                    // 查询范围比较小
-                    stopRowKey = RowKeyUtil.makeMaxRowKey(vin, clazz, endTime);
-                }
+                // 查询范围比较小
+                stopRowKey = RowKeyUtil.makeMaxRowKey(vin);
             }
 
             // String转Bytes
@@ -183,14 +169,18 @@ public class BigTableServiceImpl implements BigTableService {
             scan.setFilter(filterList);
 
             // 遍历查询结果集
-            T data;
+            DataOrigin data;
             List<DataOrigin> dataList = new ArrayList<>();
             ResultScanner rs = table.getScanner(scan);
+            String rowKey;
             Cell dataCell;
             String dataString;
             Cell originCell;
             String originString;
             for (Result result : rs) {
+                // row key
+                rowKey = Bytes.toString(result.getRow());
+
                 // 解析数据
                 dataCell = result.getColumnLatestCell(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA));
                 dataString = Bytes.toString(CellUtil.cloneValue(dataCell));
@@ -204,7 +194,7 @@ public class BigTableServiceImpl implements BigTableService {
                 if (StringUtils.isNotBlank(dataString)) {
                     try {
                         // 添加返回值
-                        dataList.add(new DataOrigin(dataString, dataTs, originString, originTs));
+                        dataList.add(new DataOrigin(rowKey, dataString, dataTs, originString, originTs));
                     } catch (Exception e) {
                         log.error("queryData: json convert object exception", e);
                     }
