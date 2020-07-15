@@ -19,7 +19,7 @@ incarcloud:
   hbase:
     # 表格存储zk信息
     zookeeper:
-      quorum: 10.0.11.34,10.0.11.35,10.0.11.39
+      quorum: 10.0.11.33,10.0.11.34,10.0.11.35
       property:
         clientPort: 2181
 
