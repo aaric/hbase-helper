@@ -168,6 +168,9 @@ public class BigTableServiceImpl implements BigTableService {
             // 设置过滤器
             scan.setFilter(filterList);
 
+            // 关闭block cache
+            scan.setCacheBlocks(false);
+
             // 遍历查询结果集
             DataOrigin data;
             List<DataOrigin> dataList = new ArrayList<>();
