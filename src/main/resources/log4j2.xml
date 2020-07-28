@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="project.name">output</Property>
+        <Property name="log.charset">utf-8</Property>
+        <Property name="log.pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} -%5p ${PID:-} [%15.15t] %-30.30C{1.} : %m%n</Property>
+    </Properties>
+    <Appenders>
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="${log.pattern}" charset="${log.charset}"/>
+        </Console>
+        <RollingFile name="ROLLING_FILE" fileName="${project.name}.log"
+                     filePattern="$${date:yyyy-MM}/${project.name}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${log.pattern}" charset="${log.charset}"/>
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="500MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="50"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Logger name="com.incarcloud" level="DEBUG"/>
+        <Root level="WARN">
+            <AppenderRef ref="CONSOLE"/>
+            <AppenderRef ref="ROLLING_FILE"/>
+        </Root>
+    </Loggers>
+</Configuration>

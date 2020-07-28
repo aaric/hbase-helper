@@ -11,20 +11,20 @@ management:
 
 # Logging settings
 ## 使用starter log4j2省略log4j2.xml文件
-logging:
-  level:
-    root: WARN
-    org:
-      springframework:
-        security: INFO
-        web: ERROR
-      hibernate: INFO
-    com:
-      incarcloud: ${LOGGING_LEVEL_COM_INCARCLOUD:DEBUG}
-  file:
-    path: ${LOGGING_FILE_PATH:./}
-    name: output.log
-    max-size: ${LOGGING_FILE_MAX_SIZE:200MB}
+#logging:
+#  level:
+#    root: WARN
+#    org:
+#      springframework:
+#        security: INFO
+#        web: ERROR
+#      hibernate: INFO
+#    com:
+#      incarcloud: ${LOGGING_LEVEL_COM_INCARCLOUD:DEBUG}
+#  file:
+#    path: ${LOGGING_FILE_PATH:./}
+#    name: output.log
+#    max-size: ${LOGGING_FILE_MAX_SIZE:200MB}
 
 # Spring settings
 spring:
