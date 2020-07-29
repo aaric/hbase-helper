@@ -2,6 +2,7 @@ package com.incarcloud.helper.service;
 
 import com.incarcloud.boar.bigtable.IBigTable;
 import lombok.extern.log4j.Log4j2;
+import org.apache.hadoop.hbase.client.Connection;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -26,10 +27,13 @@ public class BigTableServiceTests {
     @Autowired
     private BigTableService bigTableService;
 
+    @Autowired
+    private Connection bigTableConnectionDeletion;
+
     @Test
     @Disabled
     public void testGetRecord() {
-        BigTableService.DataOrigin dataOrigin = bigTableService.getRecord("zs:telemetry_jtt808",
+        BigTableService.DataOrigin dataOrigin = bigTableService.getRecord(bigTableConnectionDeletion, "zs:telemetry_jtt808",
                 "0187000TESTGPS0000000002JTT808POSITION#20200710103958####0001");
         log.debug("dataOrigin --> {}", dataOrigin);
         Assertions.assertNotNull(dataOrigin);
@@ -38,14 +42,14 @@ public class BigTableServiceTests {
     @Test
     @Disabled
     public void testDeleteRecord() {
-        Assertions.assertTrue(bigTableService.deleteRecord("zs:telemetry_ic",
+        Assertions.assertTrue(bigTableService.deleteRecord(bigTableConnectionDeletion, "zs:telemetry_ic",
                 "e498000TESTBOX0000000001CHECK##########20200713153656####0001"));
     }
 
     @Test
     @Disabled
     public void testQueryRecord() throws Exception {
-        List<BigTableService.DataOrigin> dataOriginList = bigTableService.queryRecord("zs:telemetry_ic",
+        List<BigTableService.DataOrigin> dataOriginList = bigTableService.queryRecord(bigTableConnectionDeletion, "zs:telemetry_ic",
                 "TESTBOX0000000001", IBigTable.Sort.DESC, 50, null);
         dataOriginList.forEach(o -> System.out.println(o.getRowKey()));
         Assertions.assertNotNull(dataOriginList);
