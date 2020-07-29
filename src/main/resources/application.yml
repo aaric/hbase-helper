@@ -50,7 +50,7 @@ helper:
     # 数据表配置
     table-from:
       name: zspress:telemetry_ic
-      # 压测库配置
+      # 压测库配置（同一个库，不需要设置）
       zookeeper:
         quorum: ${incarcloud.hbase.zookeeper.quorum}
         property:

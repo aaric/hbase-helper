@@ -28,7 +28,7 @@ helper:
     # 数据表配置
     table-from:
       name: zspress:telemetry_ic
-      # 压测库配置
+      # 压测库配置（同一个库，不需要设置）
       zookeeper:
         quorum: 10.0.11.33,10.0.11.34,10.0.11.35
     table-to:
