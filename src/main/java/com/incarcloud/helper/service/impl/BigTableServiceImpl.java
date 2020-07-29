@@ -99,7 +99,7 @@ public class BigTableServiceImpl implements BigTableService {
             table.delete(delete);
 
             // 记录日志
-            log.debug("[{}] Delete rowKey: {}", bigTableConnection.getConfiguration().get("hbase.zookeeper.quorum"), rowKey);
+            log.debug("[{} - {}] Delete rowKey: {}", bigTableConnection.getConfiguration().get("hbase.zookeeper.quorum"), tableName, rowKey);
 
             // 返回成功
             return true;
