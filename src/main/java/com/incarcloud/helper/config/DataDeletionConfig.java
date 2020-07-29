@@ -20,10 +20,27 @@ public class DataDeletionConfig {
     /**
      * 数据表配置
      */
-    private String table;
+    private TableDelete table;
 
     /**
      * 迁移vin清单
      */
     private List<String> vinList;
+
+    /**
+     * 数据表配置类（正式库）
+     */
+    @Data
+    public static class TableDelete {
+        private String name;
+        private ZookeeperQuorum zookeeper;
+    }
+
+    /**
+     * Zookeeper配置
+     */
+    @Data
+    public static class ZookeeperQuorum {
+        private String quorum;
+    }
 }

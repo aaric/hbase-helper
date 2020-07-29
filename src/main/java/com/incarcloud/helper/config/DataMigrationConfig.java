@@ -18,9 +18,14 @@ import java.util.List;
 public class DataMigrationConfig {
 
     /**
-     * 数据表配置
+     * 压测库配置
      */
-    private TableConfig table;
+    private TableFrom tableFrom;
+
+    /**
+     * 正式库配置
+     */
+    private TableFrom tableTo;
 
     /**
      * 迁移vin清单
@@ -28,11 +33,28 @@ public class DataMigrationConfig {
     private List<String> vinList;
 
     /**
-     * 数据表配置类
+     * 数据表配置类（正式库）
      */
     @Data
-    public static class TableConfig {
-        private String from;
-        private String to;
+    public static class TableFrom {
+        private String name;
+        private ZookeeperQuorum zookeeper;
+    }
+
+    /**
+     * 数据表配置类（正式库）
+     */
+    @Data
+    public static class TableTo {
+        private String name;
+        private ZookeeperQuorum zookeeper;
+    }
+
+    /**
+     * Zookeeper配置
+     */
+    @Data
+    public static class ZookeeperQuorum {
+        private String quorum;
     }
 }

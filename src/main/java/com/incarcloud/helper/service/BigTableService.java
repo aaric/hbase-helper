@@ -4,6 +4,7 @@ import com.incarcloud.boar.bigtable.IBigTable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.hadoop.hbase.client.Connection;
 
 import java.util.List;
 
@@ -71,39 +72,43 @@ public interface BigTableService {
     /**
      * 存储解析数据
      *
-     * @param tableName  表名称
-     * @param dataOrigin 解析数据与原始报文数据
+     * @param bigTableConnection HBase连接对象
+     * @param tableName          表名称
+     * @param dataOrigin         解析数据与原始报文数据
      * @return
      */
-    boolean saveRecord(String tableName, DataOrigin dataOrigin);
+    boolean saveRecord(Connection bigTableConnection, String tableName, DataOrigin dataOrigin);
 
     /**
      * 根据row key查询记录
      *
-     * @param tableName 表名称
-     * @param rowKey    主键
+     * @param bigTableConnection HBase连接对象
+     * @param tableName          表名称
+     * @param rowKey             主键
      * @return
      */
-    DataOrigin getRecord(String tableName, String rowKey);
+    DataOrigin getRecord(Connection bigTableConnection, String tableName, String rowKey);
 
     /**
      * 根据row key删除记录
      *
-     * @param tableName 表名称
-     * @param rowKey    主键
+     * @param bigTableConnection HBase连接对象
+     * @param tableName          表名称
+     * @param rowKey             主键
      * @return
      */
-    boolean deleteRecord(String tableName, String rowKey);
+    boolean deleteRecord(Connection bigTableConnection, String tableName, String rowKey);
 
     /**
      * 分页查询记录
      *
-     * @param tableName 表名称
-     * @param vin       车架号
-     * @param sort      默认按照时间倒序，排序规则：按照时间升序或者倒序
-     * @param pageSize  分页大小
-     * @param startKey  指定起始RowKey
+     * @param bigTableConnection HBase连接对象
+     * @param tableName          表名称
+     * @param vin                车架号
+     * @param sort               默认按照时间倒序，排序规则：按照时间升序或者倒序
+     * @param pageSize           分页大小
+     * @param startKey           指定起始RowKey
      * @return
      */
-    List<DataOrigin> queryRecord(String tableName, String vin, IBigTable.Sort sort, Integer pageSize, String startKey);
+    List<DataOrigin> queryRecord(Connection bigTableConnection, String tableName, String vin, IBigTable.Sort sort, Integer pageSize, String startKey);
 }

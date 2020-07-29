@@ -11,7 +11,6 @@ import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.*;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -28,14 +27,8 @@ import java.util.List;
 @Service
 public class BigTableServiceImpl implements BigTableService {
 
-    /**
-     * HBase连接对象
-     */
-    @Autowired
-    private Connection bigTableConnection;
-
     @Override
-    public boolean saveRecord(String tableName, DataOrigin dataOrigin) {
+    public boolean saveRecord(Connection bigTableConnection, String tableName, DataOrigin dataOrigin) {
         // 存储到大数据
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // base-族，data-解析数据，origin-原始报文
@@ -55,7 +48,7 @@ public class BigTableServiceImpl implements BigTableService {
             table.put(put);
 
             // 记录日志
-            log.debug("Save rowKey: {}", dataOrigin.getRowKey());
+            log.debug("[{} - {}] Save rowKey: {}", bigTableConnection.getConfiguration().get("hbase.zookeeper.quorum"), tableName, dataOrigin.getRowKey());
 
             // 返回结果
             return true;
@@ -66,7 +59,7 @@ public class BigTableServiceImpl implements BigTableService {
     }
 
     @Override
-    public DataOrigin getRecord(String tableName, String rowKey) {
+    public DataOrigin getRecord(Connection bigTableConnection, String tableName, String rowKey) {
         // 根据row key查询记录
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // 读取数据
@@ -82,6 +75,9 @@ public class BigTableServiceImpl implements BigTableService {
             String originString = Bytes.toString(CellUtil.cloneValue(originCell));
             long originTs = originCell.getTimestamp(); //入库时间
 
+            // 记录日志
+            log.debug("[{} - {}] Get rowKey: {}", bigTableConnection.getConfiguration().get("hbase.zookeeper.quorum"), tableName, rowKey);
+
             // 判断json字符串是否为空白字符
             if (StringUtils.isNotBlank(dataString)) {
                 // 返回结果
@@ -95,7 +91,7 @@ public class BigTableServiceImpl implements BigTableService {
     }
 
     @Override
-    public boolean deleteRecord(String tableName, String rowKey) {
+    public boolean deleteRecord(Connection bigTableConnection, String tableName, String rowKey) {
         // 根据row key删除记录
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // 删除数据
@@ -103,7 +99,7 @@ public class BigTableServiceImpl implements BigTableService {
             table.delete(delete);
 
             // 记录日志
-            log.debug("Delete rowKey: {}", rowKey);
+            log.debug("[{} - {}] Delete rowKey: {}", bigTableConnection.getConfiguration().get("hbase.zookeeper.quorum"), tableName, rowKey);
 
             // 返回成功
             return true;
@@ -115,7 +111,7 @@ public class BigTableServiceImpl implements BigTableService {
     }
 
     @Override
-    public List<DataOrigin> queryRecord(String tableName, String vin, IBigTable.Sort sort, Integer pageSize, String startKey) {
+    public List<DataOrigin> queryRecord(Connection bigTableConnection, String tableName, String vin, IBigTable.Sort sort, Integer pageSize, String startKey) {
         // 分页查询记录
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // 构建查询条件

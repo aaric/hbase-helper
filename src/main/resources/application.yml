@@ -37,7 +37,7 @@ spring:
 incarcloud:
   # HBase配置
   hbase:
-    # 表格存储zk信息
+    # 表格存储zk信息（正式库）
     zookeeper:
       quorum: ${HBASE_ZOOKEEPER_QUORUM:10.0.11.33,10.0.11.34,10.0.11.35}
       property:
@@ -48,16 +48,33 @@ helper:
   # 迁移功能
   data-migration:
     # 数据表配置
-    table:
-      from: zspress:telemetry_ic
-      to: zs:telemetry_ic
+    table-from:
+      name: zspress:telemetry_ic
+      # 压测库配置（同一个库，不需要设置）
+      zookeeper:
+        quorum: ${incarcloud.hbase.zookeeper.quorum}
+        property:
+          clientPort: ${HBASE_ZOOKEEPER_CLIENT_PORT:2181}
+    table-to:
+      name: zs:telemetry_ic
+      # 正式库配置
+      zookeeper:
+        quorum: ${incarcloud.hbase.zookeeper.quorum}
+        property:
+          clientPort: ${incarcloud.hbase.zookeeper.property.clientPort}
     # 迁移vin列表
     vin-list:
       - TESTBOX0000000001
   # 删除功能
   data-deletion:
     # 数据表列表
-    table: zs:telemetry_jtt808
+    table:
+      name: zs:telemetry_jtt808
+      # 正式库配置
+      zookeeper:
+        quorum: ${incarcloud.hbase.zookeeper.quorum}
+        property:
+          clientPort: ${incarcloud.hbase.zookeeper.property.clientPort}
     # 删除vin列表
     vin-list:
       - TESTGPS0000000001
