@@ -32,17 +32,22 @@ public class BigTableServiceImpl implements BigTableService {
         // 存储到大数据
         try (Table table = bigTableConnection.getTable(TableName.valueOf(tableName))) {
             // base-族，data-解析数据，origin-原始报文
+            // 解析数据
             Put put = new Put(Bytes.toBytes(dataOrigin.getRowKey()));
             put.addColumn(Bytes.toBytes(FAMILY_BASE),
                     Bytes.toBytes(QUALIFIER_DATA),
                     dataOrigin.getDataTs(),
                     Bytes.toBytes(dataOrigin.getDataString())
-            ); //解析数据
-            put.addColumn(Bytes.toBytes(FAMILY_BASE),
-                    Bytes.toBytes(QUALIFIER_ORIGIN),
-                    dataOrigin.getOriginTs(),
-                    Bytes.toBytes(dataOrigin.getOriginString())
-            ); //原始报文数据
+            );
+
+            // 原始报文数据
+            if (0 != dataOrigin.getOriginTs()) {
+                put.addColumn(Bytes.toBytes(FAMILY_BASE),
+                        Bytes.toBytes(QUALIFIER_ORIGIN),
+                        dataOrigin.getOriginTs(),
+                        Bytes.toBytes(dataOrigin.getOriginString())
+                );
+            }
 
             // 执行put操作
             table.put(put);
@@ -146,7 +151,9 @@ public class BigTableServiceImpl implements BigTableService {
 
             // String转Bytes
             byte[] startRowBytes = Bytes.toBytes(startRowKey);
-            startRowBytes = Bytes.copy(startRowBytes, 0, startRowBytes.length - 1); //包含关系
+
+            // 包含关系
+            startRowBytes = Bytes.copy(startRowBytes, 0, startRowBytes.length - 1);
             byte[] stopRowBytes = Bytes.toBytes(stopRowKey);
 
             // 设置查询数据范围
@@ -158,8 +165,11 @@ public class BigTableServiceImpl implements BigTableService {
             filterList.addFilter(new SkipFilter(new SingleColumnValueFilter(Bytes.toBytes(FAMILY_BASE),
                     Bytes.toBytes(QUALIFIER_HIDDEN),
                     CompareFilter.CompareOp.EQUAL,
-                    new NullComparator()))); //单列值过滤器
-            filterList.addFilter(new PageFilter(pageSize)); //分页过滤器
+                    // 单列值过滤器
+                    new NullComparator())));
+
+            // 分页过滤器
+            filterList.addFilter(new PageFilter(pageSize));
 
             // 设置过滤器
             scan.setFilter(filterList);
@@ -183,12 +193,20 @@ public class BigTableServiceImpl implements BigTableService {
                 // 解析数据
                 dataCell = result.getColumnLatestCell(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_DATA));
                 dataString = Bytes.toString(CellUtil.cloneValue(dataCell));
-                long dataTs = dataCell.getTimestamp(); //入库时间
+
+                // 入库时间
+                long dataTs = dataCell.getTimestamp();
 
                 // 原始报文数据
+                long originTs = 0;
                 originCell = result.getColumnLatestCell(Bytes.toBytes(FAMILY_BASE), Bytes.toBytes(QUALIFIER_ORIGIN));
-                originString = Bytes.toString(CellUtil.cloneValue(originCell));
-                long originTs = originCell.getTimestamp(); //入库时间
+                if (null != originCell) {
+                    originString = Bytes.toString(CellUtil.cloneValue(originCell));
+
+                    originTs = originCell.getTimestamp();
+                } else {
+                    originString = null;
+                }
 
                 if (StringUtils.isNotBlank(dataString)) {
                     try {
