@@ -1,11 +1,15 @@
 # hbase-helper
 
+[![java](https://img.shields.io/badge/java-1.8-brightgreen.svg?style=flat&logo=java)](https://www.oracle.com/java/technologies/javase-downloads.html)
+[![gradle](https://img.shields.io/badge/gradle-6.3-brightgreen.svg?style=flat&logo=gradle)](https://docs.gradle.org/6.3/userguide/installation.html)
+[![release](https://img.shields.io/badge/release-0.2.1-blue.svg)](https://github.com/aaric/hbase-helper/releases)
+
 > 华为云表格存储迁移和删除功能。
 
 ## 1.启动命令
 
 ```bash
-java -jar hbase-helper-0.2.0-SNAPSHOT.jar
+java -jar hbase-helper-0.2.1-SNAPSHOT.jar
 ```
 
 ## 2.配置信息
